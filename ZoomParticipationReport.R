@@ -8,7 +8,6 @@
 # Example: cd path_to_zoom_chat_and_roster_files/
 #          Rscript ZoomParticipationReport.R
 #
-# The script needs at least the zoom chat file which is saved by Zoom as "meeting_saved_chat.txt" 
 # If only the chat file is provided, it will output a more organized chat report
 # If a roster is also provided, it will match chat names with the roster names. This script was made
 # to handle roster files from myUCLA downloaded as  "Tab-Separated" (.tsv)
