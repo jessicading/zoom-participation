@@ -1,0 +1,15 @@
+(base) Jessicas-MacBook-Pro-3:~ jessicading$ cd ~/Desktop/7C_Attendance/
+(base) Jessicas-MacBook-Pro-3:7C_Attendance jessicading$ ls
+Spring_2020-LIFESCI_0007C_____003E_-tsv.tsv
+meeting_saved_chat.txt
+(base) Jessicas-MacBook-Pro-3:7C_Attendance jessicading$ Rscript ~/Desktop/ZoomParticipationReport.R 
+There are  71  students.
+There are  77  participants in the chat.
+
+THE REST OF THE OUTPUT IS DELETED FOR PRIVACY REASONS. 
+
+Report done. Saved in 'Participation_Results.xls' in current working directory.
+(base) Jessicas-MacBook-Pro-3:7C_Attendance jessicading$ ls
+Participation_Results.xls			meeting_saved_chat.txt
+Spring_2020-LIFESCI_0007C_____003E_-tsv.tsv
+(base) Jessicas-MacBook-Pro-3:7C_Attendance jessicading$ 
