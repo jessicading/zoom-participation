@@ -8,6 +8,7 @@ If a Zoom participants file is also provided, the result will include Zoom parti
 If only a chat file is provided, the output will be an organized chat in long and wide formats.
 
 ### Files 
+*** Having all three is not required
 1. <b>Chat file.</b> This is saved from the Zoom room as "meeting_saved_chat.txt".<br/>
 2. <b>Roster file.</b> This is the "Tab-Separated" roster downloaded from myUCLA.<br/>
 3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" from your Zoom account page.<br/>
