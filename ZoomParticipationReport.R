@@ -145,9 +145,7 @@ matchRosterChatName <- function(roster_people = roster_people, chat_people = cha
       }
     }
   }
-  
-  
-  
+
   one_name_match_final <- one_name_match[!(one_name_match$Chat_Name %in% matched_names$Chat_Name),]
   toBeMatched <- setdiff(one_name_match$Roster_Name, one_name_match_final$Roster_Name)
   
@@ -265,123 +263,6 @@ if(length(roster)==1){
   all_matched <- matching_result[["MatchingResult"]]
   matched_names <- matching_result[["HiConfMatch"]]
   
-  # missing_in_chat <- c()
-  # matched_names <- data.frame(stringsAsFactors = FALSE)
-  # one_name_match <- data.frame(stringsAsFactors = FALSE)
-  # grep_match <- data.frame(stringsAsFactors = FALSE)
-  
-  # for(name in roster_people){
-  #   vector_name = unlist(strsplit(name, split = " "))
-  #   present <- unlist(sapply(X = chat_people, FUN = function(x){
-  #     y <- x
-  #     y <- unlist(strsplit(y, split = " "))
-  #     if(length(intersect(y, vector_name))>=2){
-  #       return(TRUE)
-  #     }
-  #     else{
-  #       return(FALSE)
-  #     }
-  #   }))
-  #   if(sum(present)==0){
-  #     second_try <- unlist(sapply(X = chat_people, FUN = function(x){
-  #       y <- x
-  #       y <- unlist(strsplit(y, split = " "))
-  #       if(length(intersect(y, vector_name))>=1){
-  #         return(TRUE)
-  #       }
-  #       else{
-  #         return(FALSE)
-  #       }
-  #     }))
-  #   }
-  #   else{
-  #     matched_names <- rbind(matched_names,
-  #                            data.frame("Roster_Name"=name,
-  #                                       "Chat_Name"=chat_people[present],
-  #                                       "Confidence"="high", 
-  #                                       stringsAsFactors = FALSE))
-  #     next
-  #   }
-  #   if(sum(second_try)==0){
-  #     third_try <- lapply(X = vector_name, FUN = function(x){
-  #       return(grepl(x, chat_people))
-  #     })
-  #     third_try_vect <- sapply(X = vector_name, FUN = function(x){
-  #       return(grepl(x, chat_people))
-  #     })
-  #     if(sum(third_try_vect)==0){
-  #       missing_in_chat <- c(missing_in_chat, name)
-  #     }
-  #     else{
-  #       grep_matched_names <- unlist(lapply(third_try, function(x){return(chat_people[x])}))
-  #       grep_matched_names = unique(grep_matched_names)
-  #       for(grepname in grep_matched_names){
-  #         grep_match <- rbind(grep_match,
-  #                             data.frame("Roster_Name"=name,
-  #                                        "Chat_Name"=grepname,
-  #                                        "Confidence"="very low",
-  #                                        stringsAsFactors = FALSE))
-  #       }
-  #     }
-  #   }
-  #   else{
-  #     if(sum(second_try)==1){
-  #       one_name_match <- rbind(one_name_match,
-  #                               data.frame("Roster_Name"=name,
-  #                                          "Chat_Name"=chat_people[second_try],
-  #                                          "Confidence"="low",
-  #                                          stringsAsFactors = FALSE))
-  #     }
-  #     else{
-  #       #cat("Warning: ", name, " matched multiple chat names at low confidence:\n")
-  #       print(chat_people[second_try])
-  #       for(chatname in chat_people[second_try]){
-  #         one_name_match <- rbind(one_name_match,
-  #                                 data.frame("Roster_Name"=name,
-  #                                            "Chat_Name"=chatname,
-  #                                            "Confidence"="low",
-  #                                            stringsAsFactors = FALSE))
-  #       }
-  #     }
-  #   }
-  # }
-  # 
-  # 
-  # 
-  # one_name_match_final <- one_name_match[!(one_name_match$Chat_Name %in% matched_names$Chat_Name),]
-  # toBeMatched <- setdiff(one_name_match$Roster_Name, one_name_match_final$Roster_Name)
-  # 
-  # for(name in toBeMatched){
-  #   vector_name = unlist(strsplit(name, split = " "))
-  #   third_try <- lapply(X = vector_name, FUN = function(x){
-  #     return(grepl(x, chat_people))
-  #   })
-  #   third_try_vect <- sapply(X = vector_name, FUN = function(x){
-  #     return(grepl(x, chat_people))
-  #   })
-  #   if(sum(third_try_vect)==0){
-  #     missing_in_chat <- c(missing_in_chat, name)
-  #   }
-  #   else{
-  #     grep_matched_names <- unlist(lapply(third_try, function(x){return(chat_people[x])}))
-  #     grep_matched_names = unique(grep_matched_names)
-  #     for(grepname in grep_matched_names){
-  #       grep_match <- rbind(grep_match,
-  #                           data.frame("Roster_Name"=name,
-  #                                      "Chat_Name"=grepname,
-  #                                      "Confidence"="very low",
-  #                                      stringsAsFactors = FALSE))
-  #     }
-  #   }
-  # }
-  # 
-  # grep_match_final <- grep_match[!(grep_match$Chat_Name %in% matched_names$Chat_Name),]
-  # toBeMatched <- setdiff(grep_match$Roster_Name, grep_match_final$Roster_Name)
-  # 
-  # missing_in_chat <- c(missing_in_chat, toBeMatched)
-  # 
-  # all_matched <- rbind(matched_names, one_name_match_final, grep_match_final)
-  
   if(length(missing_in_chat)>0){
     cat("The following students were not matched with any chat names:\n")
     print(missing_in_chat)
@@ -396,25 +277,6 @@ if(length(roster)==1){
     cat("All students were matched with a chat name! Though, please check the Roster_Name_Chat_Name_Matching file, 
       especially for low and very low confidence matching for proper matching.\n\n")
   }
-  
-  # reportDuplicateMatching <- function(df, confidence_level){
-  #   if(sum(duplicated(df$Roster_Name))>0){
-  #     for(name in df$Roster_Name[duplicated(df$Roster_Name)]){
-  #       cat(name, " matched multiple chat names at ", confidence_level, ". They are as follows:\n")
-  #       print(df$Chat_Name[df$Roster_Name==name])
-  #     }
-  #   }
-  #   if(sum(duplicated(df$Chat_Name))>0){
-  #     for(name in df$Chat_Name[duplicated(df$Chat_Name)]){
-  #       cat(name, " matched multiple roster names at ", confidence_level, ". They are as follows:\n")
-  #       print(df$Roster_Name[df$Chat_Name==name])
-  #     }
-  #   }
-  # }
-  # 
-  # reportDuplicateMatching(df = matched_names, confidence_level = "high confidence")
-  # reportDuplicateMatching(df = one_name_match_final, confidence_level = "low confidence")
-  # reportDuplicateMatching(df = grep_match_final, confidence_level = "very low confidence")
   
   long_chat=data.frame("Time"=chat$Time)
   long_chat$Chat_Name <- chat$Individual
