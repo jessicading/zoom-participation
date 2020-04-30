@@ -12,7 +12,7 @@ If only a chat file is provided, the output will be an organized chat in long an
 2. <b>Roster file.</b> This is the "Tab-Separated" roster downloaded from myUCLA.<br/>
 3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" from your Zoom account page.<br/>
 
-To reiterate the text above, possible combinations of files are (1) only <b>Chat file</b>, (2) <b>Chat file</b> and <b>Roster file</b>, (3) <b>Roster file</b> and <b>Zoom Participations file</b>, and (4) <b>Chat file</b>, <b>Roster file</b>, and <b>Zoom Participants file</b>. 
+To reiterate the text above, possible combinations of files are (1) only <b>Chat file</b>, (2) <b>Chat file</b> and <b>Roster file</b>, (3) <b>Roster file</b> and <b>Zoom Participants file</b>, and (4) <b>Chat file</b>, <b>Roster file</b>, and <b>Zoom Participants file</b>. 
 
 
 ### Install R and WriteXLS
