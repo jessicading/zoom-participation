@@ -8,6 +8,7 @@
 # Example: cd path_to_zoom_chat_and_roster_files/
 #          Rscript ZoomParticipationReport.R
 #
+# The script needs at least the zoom chat file which is saved by Zoom as "meeting_saved_chat.txt" 
 # If only the chat file is provided, it will output a more organized chat report
 # If a roster is also provided, it will match chat names with the roster names. This script was made
 # to handle roster files from myUCLA downloaded as  "Tab-Separated" (.tsv)
@@ -23,6 +24,9 @@
 # (2) The chat file must have "chat" in its file name
 # (3) The Zoom participants file must be as is, downloded from Zoom and have "participants" in the file name
 # (4) No other files in the current working directory can match these descriptors
+#
+
+# add gsub(",","", chat_name) 
 #
 
 library(WriteXLS)
@@ -144,7 +148,9 @@ matchRosterChatName <- function(roster_people = roster_people, chat_people = cha
       }
     }
   }
-
+  
+  
+  
   one_name_match_final <- one_name_match[!(one_name_match$Chat_Name %in% matched_names$Chat_Name),]
   toBeMatched <- setdiff(one_name_match$Roster_Name, one_name_match_final$Roster_Name)
   
@@ -202,6 +208,7 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
 
   chat_people = tolower(unique(zoom_particip$Name..Original.Name.))
   chat_people = chat_people[!grepl("\\[la\\]", chat_people)]
+  chat_people = gsub(",","",chat_people)
   
   cat("There are ", length(roster_people)," students.\n")
   cat("There are ", length(chat_people)," unique 'names' in the Zoom participants file.\n")
@@ -211,6 +218,7 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   print(matching_result[["Missing"]])
   matchings <- matching_result[["MatchingResult"]]
   matchings <- matchings[order(matchings$Roster_Name),]
+  colnames(matchings) <- c("Roster_Name","Zoom_Participant_Name","Confidence")
   write.table(matchings, "Roster_Match_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
   write.table(data.frame("Missing_Students"=matching_result[["Missing"]]), 
               "Missing_Roster_In_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
@@ -237,6 +245,7 @@ chat <- rbind(chat, private_chat)
 chat$Type <- ifelse(grepl("(Privately)",chat$All), "Private", "To everyone")
 
 chat$Individual <- gsub(" From ","", chat$Individual)
+chat$Individual <- gsub(",","", chat$Individual)
 
 chat = chat[order(chat$Time),]
 chat <- chat[,c("Time","Individual","Type","Content","All")]
@@ -251,6 +260,7 @@ if(length(roster)==1){
   roster$Name <- gsub(",","", roster$Name)
   
   chat_people <- unique(chat$Individual)
+  chat_people <- gsub(",","", chat_people)
   roster_people <- unique(roster$Name)
   
   
@@ -276,6 +286,7 @@ if(length(roster)==1){
     cat("All students were matched with a chat name! Though, please check the Roster_Name_Chat_Name_Matching file, 
       especially for low and very low confidence matching for proper matching.\n\n")
   }
+  
   
   long_chat=data.frame("Time"=chat$Time)
   long_chat$Chat_Name <- chat$Individual
@@ -321,6 +332,7 @@ if(length(roster)==1){
       participating = unique(participating)
       not_participating = setdiff(unique(long_chat$Roster_Name), participating)
       not_participating = not_participating[!grepl("\\[la\\]", not_participating)]
+      if(length(not_participating)==0) not_participating = "none"
       ParticipationResultsByRoster <- rbind(ParticipationResultsByRoster,
                                             data.frame("Chat"=word, 
                                                        "Participants"=concatenate(participating, mysep = ", "),
@@ -354,6 +366,7 @@ if(length(roster)==1){
       participating = unique(participating)
       not_participating = setdiff(unique(long_chat$Chat_Name), participating)
       not_participating = not_participating[!grepl("\\[la\\]", not_participating)]
+      if(length(not_participating)==0) not_participating = "none"
       ParticipationResultsByChatName <- rbind(ParticipationResultsByChatName,
                                               data.frame("Chat"=word, 
                                                          "Participants"=concatenate(participating, mysep = ", "),
@@ -450,7 +463,7 @@ if(length(roster)==1){
   
   if(length(zoom_particip)==1){
     zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
-    cat("Zoom participants file present. Now making results for this file...\n")
+    cat("Zoom participants file present. Now matching roster with Zoom participant names...\n")
     cat("There may be many duplicate matchings because students will have slightly different name across zoom sessions...\n")
     chat_people = tolower(unique(zoom_particip$Name..Original.Name.))
     chat_people = chat_people[!grepl("\\[la\\]", chat_people)]
@@ -459,13 +472,14 @@ if(length(roster)==1){
     print(matching_result[["Missing"]])
     matchings <- matching_result[["MatchingResult"]]
     matchings <- matchings[order(matchings$Roster_Name),]
-    result[["Roster_Match_Zoom_Particip"]] <- matching_result[["MatchingResult"]]
+    colnames(matchings) <- c("Roster_Name","Zoom_Participant_Name","Confidence")
+    result[["Roster_Match_Zoom_Particip"]] <- matchings
     result[["Roster_Missing_Zoom_Particip"]] <- data.frame("Missing_Students"=matching_result[["Missing"]])
   }
   
   
   WriteXLS(result, "Participation_Results.xls", SheetNames = names(result))
-  cat("\nReport done. Saved in 'Participation_Results.xls' in current working directory.\n")
+  cat("\nReport done. Saved in 'Participation_Results.xls' in current working directory.\n\n")
 } else{
   cat("Roster not detected. Assuming that user just wants a chat report. Outputting chat report in long and wide format.\n")
   cat("...\n")
@@ -483,9 +497,5 @@ if(length(roster)==1){
 }
 
 rm(list=ls())
+
 }
-
-
-
-
-
