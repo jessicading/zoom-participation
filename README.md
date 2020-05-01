@@ -41,7 +41,7 @@ Rscript path_to_script/ZoomParticipationReport.R
 ```
 An example is given in the repository - "Run_ZoomParticipationReport_on_Terminal_Example.txt"
 
-The command line prompt will output some results and all results are saved in the Participation_Results.xls file (or a series of .txt files if you are using ZoomParticipationTxtReport.R.
+The command line prompt will output some results and all results are saved in the Participation_Results.xls file (or a series of .txt files if you are using ZoomParticipationTxtReport.R).
 
 You can also run this in R by setting your working directory to the path and copy and pasting the commands in the ZoomParticipationReport.R file to the R command prompt.
 
