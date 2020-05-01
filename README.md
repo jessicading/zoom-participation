@@ -18,7 +18,7 @@ To reiterate the text above, possible combinations of files are (1) only <b>Chat
 
 ### Install R and WriteXLS
 R is needed to run the script. You can install it [here](https://www.r-project.org).<br/>
-The script uses the package WriteXLS. You will need to have Perl and certain Perl modules. More information can be found [here](https://github.com/marcschwartz/WriteXLS/blob/master/INSTALL). Once you have the Perl modules, you can install the WriteXLS package in R using ```install.packages("WriteXLS")```.
+The script uses the package WriteXLS. You will need to have Perl and certain Perl modules. More information can be found [here](https://github.com/marcschwartz/WriteXLS/blob/master/INSTALL). Once you have Perl and the Perl modules, you can install the WriteXLS package in R using ```install.packages("WriteXLS")```.
 
 You can open R in Terminal (on Mac) by typing ```R``` and return. This should open R and you can start writing R commands.
 
