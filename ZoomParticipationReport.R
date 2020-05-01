@@ -21,8 +21,8 @@
 #
 # More important details
 # (1) The roster file must be as is, downloaded from myUCLA as .tsv
-# (2) The chat file must have "chat" in its file name or ".txt"
-# (3) The Zoom participants file must be as is, downloded from Zoom as a .csv and have "participants_" in the file name
+# (2) The chat file must have "chat" in its file name
+# (3) The Zoom participants file must be as is, downloded from Zoom and have "participants" in the file name
 # (4) No other files in the current working directory can match these descriptors
 #
 
@@ -51,13 +51,18 @@ if(length(files)==0){
 roster <- files[grep("tsv", files)]
 if(length(roster)>1) cat("Error: There should only be 1 roster file which is a .tsv file")
 chat <- files[grep("chat", files)]
-if(length(chat)==0){
+if(length(chat)==0 & sum(grepl(".txt", files))>0){
   cat("Chat file not found by the identifier 'chat'. Finding based on '.txt'\n")
   chat <- files[grep(".txt", files)]
   cat("The choosen chat file is ", chat, ". Please rerun if this is not the desired chat file.\n")
 }
 if(length(chat)>1) cat("Error: There should only be 1 meeting saved chat file")
 zoom_particip <- files[grep("participants_", files)]
+if(length(zoom_particip)==0 & sum(grepl(".csv", files))>0){
+  cat("Zoom Participants file not found by the identifier 'participants_'. Finding based on '.csv'\n")
+  zoom_particip <- files[grep(".csv", files)]
+  cat("The choosen chat file is ", zoom_particip, ". Please rerun if this is not the desired chat file.\n")
+}
 if(length(zoom_particip)>1) cat("Error: There should only be 1 Zoom participants file")
 
 reportDuplicateMatching <- function(df, confidence_level){
