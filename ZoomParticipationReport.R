@@ -61,7 +61,7 @@ zoom_particip <- files[grep("participants_", files)]
 if(length(zoom_particip)==0 & sum(grepl(".csv", files))>0){
   cat("Zoom Participants file not found by the identifier 'participants_'. Finding based on '.csv'\n")
   zoom_particip <- files[grep(".csv", files)]
-  cat("The choosen Zoom Participants file is ", zoom_particip, ". Please rerun if this is not the desired chat file.\n")
+  cat("The choosen Zoom Participants file is ", zoom_particip, ". Please rerun if this is not the desired Zoom Participants file.\n")
 }
 if(length(zoom_particip)>1) cat("Error: There should only be 1 Zoom participants file")
 
@@ -405,6 +405,8 @@ if(length(roster)==1){
     ParticipationWordResults$Words <- sapply(ParticipationWordResults$Roster_Name, function(x){
       return(concatenate(participation_chats$Chat_Content[participation_chats$Roster_Name==x], mysep = ", "))
     })
+    ParticipationWordResults$Words <- as.character(ParticipationWordResults$Words)
+    ParticipationWordResults$Words[ParticipationWordResults$Words=="character(0)"] <- "None detected"
     ParticipationWordResults$Number <- sapply(ParticipationWordResults$Roster_Name, function(x){
       return(length(participation_chats$Chat_Content[participation_chats$Roster_Name==x]))
     })
@@ -453,7 +455,7 @@ if(length(roster)==1){
   }
   
   if(length(possible_participation_chats)>0){
-    result[["Participation results"]] <- ParticipationWordResults
+    result[["Participation Results"]] <- ParticipationWordResults
     ChatsFromRosterNonParticipants <- rbind(ChatsFromRosterNonParticipants,
                                             data.frame("Time"="This file exists to see if the student did put the participation word but misspelled it, for example.",
                                                        "Chat_Name"="",
@@ -463,14 +465,14 @@ if(length(roster)==1){
     result[["Chats NonParticipat Roster"]] <- ChatsFromRosterNonParticipants
   }
   result[["RosterName ChatName Matching"]] <- all_matched
-  result[["All chat long"]] <- time_ordered_chat
-  result[["All chat long roster order"]] <- name_ordered_chat
-  result[["All chat wide"]] <- wide_chat
+  result[["All Chat Long"]] <- time_ordered_chat
+  result[["All Chat Long Roster Order"]] <- name_ordered_chat
+  result[["All Chat Wide"]] <- wide_chat
   
   if(length(possible_participation_chats)>0){
-    result[["Participation chat"]] <- participation_chats
-    result[["Partic result by word Roster"]] <- ParticipationResultsByRoster
-    result[["Partic result by word ChatName"]] <- ParticipationResultsByChatName
+    result[["Participation Chat"]] <- participation_chats
+    result[["Partic Result By Word Roster"]] <- ParticipationResultsByRoster
+    result[["Partic Result By Word ChatName"]] <- ParticipationResultsByChatName
     result[["Chats NonParticipat ChatNames"]] <- ChatsFromChatNameNonParticipants
   } else cat("There were no predicted participation checks in which the same word was prompted.\n")
   
