@@ -61,7 +61,7 @@ zoom_particip <- files[grep("participants_", files)]
 if(length(zoom_particip)==0 & sum(grepl(".csv", files))>0){
   cat("Zoom Participants file not found by the identifier 'participants_'. Finding based on '.csv'\n")
   zoom_particip <- files[grep(".csv", files)]
-  cat("The choosen chat file is ", zoom_particip, ". Please rerun if this is not the desired chat file.\n")
+  cat("The choosen Zoom Participants file is ", zoom_particip, ". Please rerun if this is not the desired chat file.\n")
 }
 if(length(zoom_particip)>1) cat("Error: There should only be 1 Zoom participants file")
 
