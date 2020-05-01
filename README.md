@@ -18,18 +18,20 @@ To reiterate the text above, possible combinations of files are (1) only <b>Chat
 
 ### Install R and WriteXLS
 R is needed to run the script. You can install it [here](https://www.r-project.org).<br/>
-The script uses the package WriteXLS. You can download it in R using ```install.packages("WriteXLS")```.
+The script uses the package WriteXLS. You will need to have Perl and certain Perl modules. More information can be found [here](https://github.com/marcschwartz/WriteXLS/blob/master/INSTALL). Once you have the Perl modules, you can install the WriteXLS package in R using ```install.packages("WriteXLS")```.
 
 You can open R in Terminal (on Mac) by typing ```R``` and return. This should open R and you can start writing R commands.
 
 ```R
-install.packages("WriteXLS")
+install.packages("WriteXLS") # install
+library(WriteXLS) # check that it was installed
+testPerl() # checks that you have the required Perl modules
 ```
 
-If you have difficulty installing WriteXLS, I can send you a version of the script that outputs the result as .txt instead of .xls.
+If you have difficulty installing WriteXLS, download ZoomParticipationTxtReport.R and follow the instructions below. Using the WriteXLS package is recommended because it puts all the results in a .xls workbook. 
 
 ### Run the script
-Download the "ZoomParticipationReport.R" script in this repository. Put your Zoom/roster files in a new directory. (cannot have multiple chat/roster/Zoom participants files)
+Download the "ZoomParticipationReport.R" script from this repository. Put your Zoom/roster files in a new directory. (cannot have multiple chat/roster/Zoom participants files)
 
 In Terminal, change your current directory to the directory where the files are located. Then run the R script (make sure to put the path of the script if not in the current directory).
 
@@ -39,7 +41,7 @@ Rscript path_to_script/ZoomParticipationReport.R
 ```
 An example is given in the repository - "Run_ZoomParticipationReport_on_Terminal_Example.txt"
 
-The command line prompt will output some results and all results are saved in the Participation_Results.xls file.
+The command line prompt will output some results and all results are saved in the Participation_Results.xls file (or a series of .txt files if you are using ZoomParticipationTxtReport.R.
 
 You can also run this in R by setting your working directory to the path and copy and pasting the commands in the ZoomParticipationReport.R file to the R command prompt.
 
