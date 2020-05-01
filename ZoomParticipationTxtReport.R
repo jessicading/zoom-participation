@@ -520,7 +520,7 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
     cat("Done. Saved in current working directory.\n")
   }
   
-  #rm(list=ls())
+  rm(list=ls())
   
 }
 
