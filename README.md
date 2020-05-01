@@ -8,7 +8,7 @@ If a Zoom participants file is also provided, the result will include Zoom parti
 If only a chat file is provided, the output will be an organized chat in long and wide formats.
 
 ### Files 
-*** Having all three is not required
+*** Having all three is not required.
 1. <b>Chat file.</b> This is saved from the Zoom room as "meeting_saved_chat.txt".<br/>
 2. <b>Roster file.</b> This is the "Tab-Separated" roster downloaded from myUCLA.<br/>
 3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" from your Zoom account page.<br/>
@@ -29,9 +29,9 @@ install.packages("WriteXLS")
 If you have difficulty installing WriteXLS, I can send you a version of the script that outputs the result as .txt instead of .xls.
 
 ### Run the script
-Download the script and put the files in a new directory. (cannot have multiple chat/roster/Zoom participants files)
+Download the "ZoomParticipationReport.R" script in this repository. Put your Zoom/roster files in a new directory. (cannot have multiple chat/roster/Zoom participants files)
 
-In Terminal, change current directory to the directory where the files are located. Then run the R script.
+In Terminal, change your current directory to the directory where the files are located. Then run the R script (make sure to put the path of the script if not in the current directory).
 
 ```bash
 cd path_to_directory_with_files/
@@ -40,6 +40,13 @@ Rscript path_to_script/ZoomParticipationReport.R
 An example is given in the repository - "Run_ZoomParticipationReport_on_Terminal_Example.txt"
 
 The command line prompt will output some results and all results are saved in the Participation_Results.xls file.
+
+You can also run this in R by setting your working directory to the path and copy and pasting the commands in the ZoomParticipationReport.R file to the R command prompt.
+
+```R
+setwd("path_to_directory_with_files/")
+# paste R commands from ZoomParticipationReport.R
+```
 
 #### Downloading Zoom participants file
 In your Zoom acount page, go to the "Reports" tab. You will see the number of participants for each meeting as a link. Click on the link and export the results by clicking on the blue "Export" button. You can also choose the participants for a specific time period.
