@@ -49,7 +49,7 @@ setwd("path_to_directory_with_files/")
 ```
 
 #### Downloading Zoom participants file
-In your Zoom acount page, go to the "Reports" tab. You will see the number of participants for each meeting as a link. Click on the link and export the results by clicking on the blue "Export" button. You can also choose the participants for a specific time period.
+In your Zoom account page, go to the "Reports" tab. You will see the number of participants for each meeting as a link. Click on the link and export the results by clicking on the blue "Export" button. You can also choose the participants for a specific time period.
 
 
 #### Additional notes
@@ -60,6 +60,8 @@ The easiest way to match Zoom participants with roster names is to have Zoom par
 Please leave files as is (as downloaded from myUCLA, from the Zoom room, and from your Zoom account)! You can append rosters from different discussions together but have the 8 line header at the top for the roster file (and delete it for the subsequent appended sections). The script skips those first 8 lines. The chat file should be a .txt file with "chat" in its file name. The roster should be a .tsv file. The Zoom participants file should be a .csv file with "participants_" in its file name.
 
 This script was made specifically for LS 7C where participation checks are made sometimes more than once during the discussion.
+
+If you'd like to sponsor me to build and host a webserver, let me know. :)
 
 
 
