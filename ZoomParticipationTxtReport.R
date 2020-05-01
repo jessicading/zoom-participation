@@ -32,6 +32,8 @@
 
 #library(WriteXLS)
 
+dir.create(path = "./Participation_Results")
+
 concatenate=function(myvect, mysep="")
 {
   if(length(myvect)==0) return(myvect)
@@ -500,7 +502,7 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
     #WriteXLS(result, "Participation_Results.xls", SheetNames = names(result))
     names(result) <- gsub(" ","_", names(result))
     for(iter in 1:length(result)){
-      write.table(result[[iter]], file = paste0(names(result)[iter],".txt"), 
+      write.table(result[[iter]], file = paste0("./Participation_Results/",names(result)[iter],".txt"), 
                   row.names = FALSE, quote = FALSE, sep = "\t")
     }
     cat("\nReport done. Saved in '.txt' result files saved in current working directory.\n\n")
@@ -523,4 +525,3 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   rm(list=ls())
   
 }
-
