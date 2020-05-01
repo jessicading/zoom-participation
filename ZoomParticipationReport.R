@@ -26,9 +26,6 @@
 # (4) No other files in the current working directory can match these descriptors
 #
 
-# add gsub(",","", chat_name) 
-#
-
 library(WriteXLS)
 
 concatenate=function(myvect, mysep="")
@@ -44,10 +41,21 @@ concatenate=function(myvect, mysep="")
 }
 
 files <- list.files("./")
-if(length(files)<=1) cat("Error: Missing files. There should be 2 files: (1) the roster and (2) the saved chat\n")
+if(length(files)==0){
+  cat("Error: Missing files. There should be either one of these combination of files:\n")
+  cat("(1) only Chat file\n")
+  cat("(2) Chat file and Roster file\n")
+  cat("(3) Roster file and Zoom Participants file\n")
+  cat("(4) Chat file, Roster file, and Zoom Participants file\n\n")
+}
 roster <- files[grep("tsv", files)]
 if(length(roster)>1) cat("Error: There should only be 1 roster file which is a .tsv file")
 chat <- files[grep("chat", files)]
+if(length(chat)==0){
+  cat("Chat file not found by the identifier 'chat'. Finding based on '.txt'\n")
+  chat <- files[grep(".txt", files)]
+  cat("The choosen chat file is ", chat, ". Please rerun if this is not the desired chat file.\n")
+}
 if(length(chat)>1) cat("Error: There should only be 1 meeting saved chat file")
 zoom_particip <- files[grep("participants_", files)]
 if(length(zoom_particip)>1) cat("Error: There should only be 1 Zoom participants file")
