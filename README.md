@@ -51,7 +51,7 @@ setwd("path_to_directory_with_files/")
 ```
 
 #### Downloading Zoom participants file
-In your Zoom account page, go to the "Reports" tab. You will see the number of participants for each meeting as a link. Click on the link and export the results by clicking on the blue "Export" button. You can also choose the participants for a specific time period.
+In your Zoom account page, go to the "Reports" tab and then click on "Usage". You will see the number of participants for each meeting as a link. Click on the link and export the results by clicking on the blue "Export" button. You can also choose the participants for a specific time period.
 
 
 #### Additional notes
