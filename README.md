@@ -14,10 +14,10 @@ If only a chat file is provided, the output will be an organized chat in long an
 *** Multiple of each is allowed. This is particularly useful to run multiple sections.
 1. <b>Chat file.</b> This is saved from the Zoom room as "meeting_saved_chat.txt".<br/>
 2. <b>Roster file.</b> This is the "Tab-Separated" roster downloaded from myUCLA.<br/>
-3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" [downloaded from your Zoom account page](downloading-zoom-participants-file).<br/>
+3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" [downloaded from your Zoom account page](#downloading-zoom-participants-file).<br/>
 
 To reiterate the text above, possible combinations of files are (1) only <b>Chat file</b>, (2) <b>Chat file</b> and <b>Roster file</b>, (3) <b>Roster file</b> and <b>Zoom Participants file</b>, and (4) <b>Chat file</b>, <b>Roster file</b>, and <b>Zoom Participants file</b>.<br/>
-See [additional file information](important-file-format-informatiom). 
+See [additional file information](#important-file-format-informatiom). 
 
 ### Install R and WriteXLS
 R is needed to run the script. You can install it [here](https://www.r-project.org).<br/>
