@@ -58,7 +58,7 @@ In your Zoom account page, go to the "Reports" tab and then click on "Usage". Yo
 
 #### Important file format informatiom
 Leave files as is (as downloaded from myUCLA, from the Zoom room, and from your Zoom account)! They should already adhere to the requirements listed below.
-1. <b>Roster file:</b> Must be a .tsv file. The 8 line header must be there (the script skips those first 8 lines). If multiple roster files are provided, the script will append them and output a new Appended_Roster.tsv file. If you want to use this file for subsequent runs, you will have to add 8 lines to the beginning. You can also manually append rosters but have the 8 line header at the top and delete the header for subsequent appended sections). 
+1. <b>Roster file:</b> Must be a .tsv file. The 8 line header must be there (the script skips those first 8 lines). If multiple roster files are provided, the script will append them and output a new Appended_Roster.tsv file. If you want to use this file for subsequent runs, you will have to add 8 lines to the beginning. You can also manually append rosters but have the 8 line header at the top and delete the header for subsequent appended sections. 
 2. <b>Chat file:</b> Must have "chat" or ".txt" in its file name.
 3. <b>Zoom participants:</b> Must be a .csv file. 
 
