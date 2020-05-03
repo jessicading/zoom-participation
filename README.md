@@ -1,4 +1,6 @@
 # Zoom Participation Report
+<em>Currently in beta phase. Need more independent testing to assess robustness. Please let me know if it worked for you or whether you'd like any changes :) </em>
+
 This R script is designed to "take attendance" from the Zoom chat or Zoom participants file by referencing the roster downloaded from myUCLA.
 
 If the chat file and roster file are provided, the script will report the roster name and chat name matching result (and missing students), organized chat reports, and if a specific chat occurs more than 10 times, it will be considered a "participation check" and a report for those checks will be made as well.
