@@ -27,7 +27,7 @@ You can open R in Terminal (on Mac) by typing ```R``` and return. This should op
 
 ```R
 install.packages("WriteXLS") # install
-library(WriteXLS) # check that it was installed
+library(WriteXLS) # load the library
 testPerl() # checks that you have the required Perl modules
 ```
 
