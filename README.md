@@ -8,13 +8,14 @@ If a Zoom participants file is also provided, the result will include Zoom parti
 If only a chat file is provided, the output will be an organized chat in long and wide formats.
 
 ### Files 
-*** Having all three is not required.
+*** Having all three is not required.<br/>
+*** Multiple of each is allowed. This is particularly useful to run multiple sections.
 1. <b>Chat file.</b> This is saved from the Zoom room as "meeting_saved_chat.txt".<br/>
 2. <b>Roster file.</b> This is the "Tab-Separated" roster downloaded from myUCLA.<br/>
-3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" from your Zoom account page.<br/>
+3. <b>Zoom Participants file.</b> This is the "participants_meetingid.csv" [downloaded from your Zoom account page](downloading-zoom-participants-file).<br/>
 
-To reiterate the text above, possible combinations of files are (1) only <b>Chat file</b>, (2) <b>Chat file</b> and <b>Roster file</b>, (3) <b>Roster file</b> and <b>Zoom Participants file</b>, and (4) <b>Chat file</b>, <b>Roster file</b>, and <b>Zoom Participants file</b>. 
-
+To reiterate the text above, possible combinations of files are (1) only <b>Chat file</b>, (2) <b>Chat file</b> and <b>Roster file</b>, (3) <b>Roster file</b> and <b>Zoom Participants file</b>, and (4) <b>Chat file</b>, <b>Roster file</b>, and <b>Zoom Participants file</b>.<br/>
+See [additional file information](important-file-format-informatiom). 
 
 ### Install R and WriteXLS
 R is needed to run the script. You can install it [here](https://www.r-project.org).<br/>
@@ -53,13 +54,16 @@ setwd("path_to_directory_with_files/")
 #### Downloading Zoom participants file
 In your Zoom account page, go to the "Reports" tab and then click on "Usage". You will see the number of participants for each meeting as a link. Click on the link and export the results by clicking on the blue "Export" button. You can also choose the participants for a specific time period.
 
+#### Important file format informatiom
+Leave files as is (as downloaded from myUCLA, from the Zoom room, and from your Zoom account)! They should already adhere to the requirements listed below.
+1. <b>Roster file:</b> Must be a .tsv file. The 8 line header must be there (the script skips those first 8 lines). If multiple roster files are provided, the script will append them and output a new Appended_Roster.tsv file. If you want to use this file for subsequent runs, you will have to add 8 lines to the beginning. You can also manually append rosters but have the 8 line header at the top and delete the header for subsequent appended sections). 
+2. <b>Chat file:</b> Must have "chat" or ".txt" in its file name.
+3. <b>Zoom participants:</b> Must be a .csv file. 
 
 #### Additional notes
 Please report any issues or suggestions in this repository or email me jading@ucla.edu.
 
 The easiest way to match Zoom participants with roster names is to have Zoom participants send their university ID in the chat (privately). This script matches the names based on similarity and does not account for students sending UIDs. The script can be updated to include this functionality.
-
-Please leave files as is (as downloaded from myUCLA, from the Zoom room, and from your Zoom account)! You can append rosters from different discussions together but have the 8 line header at the top for the roster file (and delete it for the subsequent appended sections). The script skips those first 8 lines. The chat file should be a .txt file with "chat" in its file name. The roster should be a .tsv file. The Zoom participants file should be a .csv file with "participants_" in its file name.
 
 This script was made specifically for LS 7C where participation checks are made sometimes more than once during the discussion.
 
