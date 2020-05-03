@@ -48,22 +48,82 @@ if(length(files)==0){
   cat("(3) Roster file and Zoom Participants file\n")
   cat("(4) Chat file, Roster file, and Zoom Participants file\n\n")
 }
+
 roster <- files[grep("tsv", files)]
-if(length(roster)>1) cat("Error: There should only be 1 roster file which is a .tsv file")
+if(length(roster)>1){
+  ifelse(!dir.exists("./Appended_Files"), dir.create("./Appended_Files"), FALSE)
+  cat("Multiple roster files (.tsv) detected.\n")
+  cat("Appending these roster files all together...\n")
+  print(roster)
+  df <- data.frame()
+  for(file in roster){
+    df <- rbind(df, read.delim(file, stringsAsFactors = FALSE,colClasses = rep("character",8),skip = 8))
+  }
+  roster <- df
+  cat("Writing appended roster file...\n")
+  cat("Warning: if you use this appended file for future runs, manually add 8 new lines to the beginning and save as a .tsv file.\n\n")
+  write.table(roster, "./Appended_Files/Appended_roster.tsv", row.names = FALSE, sep = "\t", quote = FALSE)
+}
+if(length(roster)==1){ 
+  cat("The roster file (.tsv) is ", roster, ".\n")
+  roster <- read.delim(roster, stringsAsFactors = FALSE,colClasses = rep("character",8), skip = 8)
+}
+
 chat <- files[grep("chat", files)]
 if(length(chat)==0 & sum(grepl(".txt", files))>0){
   cat("Chat file not found by the identifier 'chat'. Finding based on '.txt'\n")
   chat <- files[grep(".txt", files)]
-  cat("The choosen chat file is ", chat, ". Please rerun if this is not the desired chat file.\n")
+  cat("The choosen chat file(s) is ", chat, ". Please rerun if this is not the desired chat file(s).\n\n")
 }
-if(length(chat)>1) cat("Error: There should only be 1 meeting saved chat file")
+if(length(chat)>1){
+  ifelse(!dir.exists("./Appended_Files/"), dir.create("./Appended_Files/"), FALSE)
+  cat("Multiple chat files ('chat' or .txt) detected.\n")
+  cat("Appending these chat files all together...\n")
+  print(chat)
+  df <- data.frame(stringsAsFactors = FALSE)
+  for(file in chat){
+    df <- rbind(df, read.delim(file,header = FALSE, quote = "",
+                               stringsAsFactors = FALSE,
+                               colClasses = rep("character",2)))
+  }
+  chat <- df
+  cat("Writing appended chat file...\n\n")
+  write.table(chat, "./Appended_Files/Appended_chat.txt", row.names = FALSE, sep = "\t", quote = FALSE)
+}
+if(length(chat)==1){ 
+  cat("The chat file is ", chat, ".\n\n")
+  chat <- read.delim(chat, header = FALSE,quote = "",
+                     stringsAsFactors = FALSE,
+                     colClasses = rep("character",2))
+}
+
 zoom_particip <- files[grep("participants_", files)]
 if(length(zoom_particip)==0 & sum(grepl(".csv", files))>0){
   cat("Zoom Participants file not found by the identifier 'participants_'. Finding based on '.csv'\n")
   zoom_particip <- files[grep(".csv", files)]
-  cat("The choosen Zoom Participants file is ", zoom_particip, ". Please rerun if this is not the desired Zoom Participants file.\n")
+  cat("The choosen Zoom Participants file is ", zoom_particip, ". Please rerun if this is not the Zoom Participants chat file.\n")
 }
-if(length(zoom_particip)>1) cat("Error: There should only be 1 Zoom participants file")
+if(length(zoom_particip)>1){
+  ifelse(!dir.exists("./Appended_Files/"), dir.create("./Appended_Files/"), FALSE)
+  cat("Multiple Zoom participants files ('participants_' or .csv) detected.\n")
+  cat("Appending these Zoom participants files all together...\n")
+  print(zoom_particip)
+  df <- data.frame(stringsAsFactors = FALSE)
+  for(file in zoom_particip){
+    df <- rbind(df, read.delim(file,
+                               stringsAsFactors = FALSE,sep = ",",
+                               colClasses = c(rep("character",4), "numeric")))
+  }
+  zoom_particip <- df
+  cat("Writing appended Zoom participants file...\n\n")
+  write.table(zoom_particip, "./Appended_Files/Appended_Zoom_Participants.csv", row.names = FALSE, sep = ",", quote = FALSE)
+}
+if(length(zoom_particip)==1){ 
+  cat("The Zoom participation file is ", chat, ".\n\n")
+  zoom_particip <- read.delim(zoom_particip, sep = ",",
+                              stringsAsFactors = FALSE,
+                              colClasses = c(rep("character",4), "numeric"))
+}
 
 reportDuplicateMatching <- function(df, confidence_level){
   if(sum(duplicated(df$Roster_Name))>0){
@@ -209,16 +269,17 @@ matchRosterChatName <- function(roster_people = roster_people, chat_people = cha
   return(list("MatchingResult"=all_matched, "Missing"=missing_in_chat))
 }
 
-if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
+if(length(roster)!=0 & length(chat)==0 & length(zoom_particip)!=0){
+  dir.create(path = "./Results")
   cat("\nRoster file and Zoom participants file provided. Now running name matching...\n")
   cat("There may be many duplicate matchings because students will have slightly different name across zoom sessions.\n")
-  zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
-  roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
+  #zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
+  #roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
   roster$Name <- tolower(roster$Name)
   roster$Name <- gsub(",","", roster$Name)
   
   roster_people <- unique(roster$Name)
-
+  
   chat_people = tolower(unique(zoom_particip$Name..Original.Name.))
   chat_people = chat_people[!grepl("\\[la\\]", chat_people)]
   chat_people = gsub(",","",chat_people)
@@ -232,285 +293,286 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   matchings <- matching_result[["MatchingResult"]]
   matchings <- matchings[order(matchings$Roster_Name),]
   colnames(matchings) <- c("Roster_Name","Zoom_Participant_Name","Confidence")
-  write.table(matchings, "Roster_Match_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+  write.table(matchings, "./Results/Roster_Match_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
   write.table(data.frame("Missing_Students"=matching_result[["Missing"]]), 
-              "Missing_Roster_In_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+              "./Results/Missing_Roster_In_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
   
   cat("\nReport done. Possible LAs are taken out.\n")
   
   rm(list=ls())
   
 } else{
-
-chat <- read.delim(chat, quote = "", stringsAsFactors = FALSE, header = FALSE)
-
-colnames(chat) <- c("Time","All")
-
-chat$Content <- sapply(chat$All, FUN = function(x){return(unlist(strsplit(x,split = " : "))[2])})
-
-private_chat <- chat[grepl("Privately", chat$All),]
-private_chat$Individual <- sapply(private_chat$All, FUN = function(x){return(unlist(strsplit(x,split = " to "))[1])})
-
-chat <- chat[!grepl("Privately", chat$All),]
-chat$Individual <- sapply(chat$All, FUN = function(x){return(unlist(strsplit(x,split = " : "))[1])})
-
-chat <- rbind(chat, private_chat)
-chat$Type <- ifelse(grepl("(Privately)",chat$All), "Private", "To everyone")
-
-chat$Individual <- gsub(" From ","", chat$Individual)
-chat$Individual <- gsub(",","", chat$Individual)
-
-chat = chat[order(chat$Time),]
-chat <- chat[,c("Time","Individual","Type","Content","All")]
-
-if(length(roster)==1){
-  #lowercase all content and names
-  chat$Content <- tolower(chat$Content)
-  chat$Individual <- tolower(chat$Individual)
   
-  roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
-  roster$Name <- tolower(roster$Name)
-  roster$Name <- gsub(",","", roster$Name)
+  #chat <- read.delim(chat, quote = "", stringsAsFactors = FALSE, header = FALSE)
   
-  chat_people <- unique(chat$Individual)
-  chat_people <- gsub(",","", chat_people)
-  roster_people <- unique(roster$Name)
+  colnames(chat) <- c("Time","All")
   
+  chat$Content <- sapply(chat$All, FUN = function(x){return(unlist(strsplit(x,split = " : "))[2])})
   
-  cat("There are ", length(roster_people)," students.\n")
-  cat("There are ", length(chat_people)," participants in the chat.\n")
+  private_chat <- chat[grepl("Privately", chat$All),]
+  private_chat$Individual <- sapply(private_chat$All, FUN = function(x){return(unlist(strsplit(x,split = " to "))[1])})
   
-  matching_result <- matchRosterChatName(roster_people = roster_people, chat_people = chat_people)
-  missing_in_chat <- matching_result[["Missing"]]
-  all_matched <- matching_result[["MatchingResult"]]
-  matched_names <- matching_result[["HiConfMatch"]]
+  chat <- chat[!grepl("Privately", chat$All),]
+  chat$Individual <- sapply(chat$All, FUN = function(x){return(unlist(strsplit(x,split = " : "))[1])})
   
-  if(length(missing_in_chat)>0){
-    cat("The following students were not matched with any chat names:\n")
-    print(missing_in_chat)
-    cat("These students did not attend or their chat name was not matched to their roster name. Please check chat names to see if the latter was the case.\n\n")
-  }
-  if(length(setdiff(unique(chat$Individual), unique(all_matched$Chat_Name)))>0){ 
-    cat("The following chat names were not matched with anyone on the roster:\n")
-    print(setdiff(unique(chat$Individual), unique(all_matched$Chat_Name)))
-    cat("\n")
-  }
-  if(length(missing_in_chat)==0){ 
-    cat("All students were matched with a chat name! Though, please check the Roster_Name_Chat_Name_Matching file, 
+  chat <- rbind(chat, private_chat)
+  chat$Type <- ifelse(grepl("(Privately)",chat$All), "Private", "To everyone")
+  
+  chat$Individual <- gsub(" From ","", chat$Individual)
+  chat$Individual <- gsub(",","", chat$Individual)
+  
+  chat = chat[order(chat$Time),]
+  chat <- chat[,c("Time","Individual","Type","Content","All")]
+  
+  if(length(roster)!=0){
+    #lowercase all content and names
+    chat$Content <- tolower(chat$Content)
+    chat$Individual <- tolower(chat$Individual)
+    
+    #roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
+    roster$Name <- tolower(roster$Name)
+    roster$Name <- gsub(",","", roster$Name)
+    
+    chat_people <- unique(chat$Individual)
+    chat_people <- gsub(",","", chat_people)
+    roster_people <- unique(roster$Name)
+    
+    
+    cat("There are ", length(roster_people)," students.\n")
+    cat("There are ", length(chat_people)," participants in the chat.\n")
+    
+    matching_result <- matchRosterChatName(roster_people = roster_people, chat_people = chat_people)
+    missing_in_chat <- matching_result[["Missing"]]
+    all_matched <- matching_result[["MatchingResult"]]
+    matched_names <- matching_result[["HiConfMatch"]]
+    
+    if(length(missing_in_chat)>0){
+      cat("The following students were not matched with any chat names:\n")
+      print(missing_in_chat)
+      cat("These students did not attend or their chat name was not matched to their roster name. Please check chat names to see if the latter was the case.\n\n")
+    }
+    if(length(setdiff(unique(chat$Individual), unique(all_matched$Chat_Name)))>0){ 
+      cat("The following chat names were not matched with anyone on the roster:\n")
+      print(setdiff(unique(chat$Individual), unique(all_matched$Chat_Name)))
+      cat("\n")
+    }
+    if(length(missing_in_chat)==0){ 
+      cat("All students were matched with a chat name! Though, please check the Roster_Name_Chat_Name_Matching file, 
       especially for low and very low confidence matching for proper matching.\n\n")
-  }
-  
-  
-  long_chat=data.frame("Time"=chat$Time)
-  long_chat$Chat_Name <- chat$Individual
-  long_chat$Roster_Name <- sapply(long_chat$Chat_Name, function(x){
-    if(x %in% all_matched$Chat_Name) return(concatenate(all_matched$Roster_Name[all_matched$Chat_Name==x], mysep = " OR "))
-    else{
-      return("no roster match")
     }
-  })
-  long_chat$Type <- ifelse(grepl("(Privately)",chat$All), "Private", "To everyone")
-  long_chat$Chat_Content <- chat$Content
-  
-  time_ordered_chat <- long_chat[order(long_chat$Time),]
-  
-  name_ordered_chat <- long_chat[order(long_chat$Roster_Name),]
-  
-  
-  
-  ##### Detects whether there are "participation words" #####
-  
-  possible_participation_chats <- c()
-  for(c in unique(chat$Content)){
-    if(sum(chat$Content %in% c)>10){
-      possible_participation_chats <- c(possible_participation_chats, c)
-    }
-  }
-  
-  if(length(possible_participation_chats>0)){
-    ParticipationResultsByRoster <- data.frame(stringsAsFactors = FALSE)
-    Individuals_missing = c()
-    indices = c()
-    for(word in possible_participation_chats){
-      participating = unique(long_chat$Roster_Name[long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)])
-      indices = c(indices, which(long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)))
-      if(grepl(" ",word)){
-        word_vect <- unlist(strsplit(word, split = " "))
-        for(w in word_vect){
-          participating = c(participating,
-                            unique(long_chat$Roster_Name[grepl(w,long_chat$Chat_Content)]))
-          indices = c(indices, which(grepl(w,long_chat$Chat_Content)))
-        }
+    
+    
+    long_chat=data.frame("Time"=chat$Time)
+    long_chat$Chat_Name <- chat$Individual
+    long_chat$Roster_Name <- sapply(long_chat$Chat_Name, function(x){
+      if(x %in% all_matched$Chat_Name) return(concatenate(all_matched$Roster_Name[all_matched$Chat_Name==x], mysep = " OR "))
+      else{
+        return("no roster match")
       }
-      participating = unique(participating)
-      not_participating = setdiff(unique(long_chat$Roster_Name), participating)
-      not_participating = not_participating[!grepl("\\[la\\]", not_participating)]
-      if(length(not_participating)==0) not_participating = "none"
-      ParticipationResultsByRoster <- rbind(ParticipationResultsByRoster,
-                                            data.frame("Chat"=word, 
-                                                       "Participants"=concatenate(participating, mysep = ", "),
-                                                       "Missing_Participants"=concatenate(not_participating, mysep = ", "),
-                                                       stringsAsFactors = FALSE))
-      Individuals_missing = c(Individuals_missing, not_participating)
-    }
+    })
+    long_chat$Type <- ifelse(grepl("(Privately)",chat$All), "Private", "To everyone")
+    long_chat$Chat_Content <- chat$Content
     
-    ChatsFromRosterNonParticipants <- data.frame(stringsAsFactors = FALSE)
-    for(i in Individuals_missing){
-      ChatsFromRosterNonParticipants = rbind(ChatsFromRosterNonParticipants,
-                                             long_chat[long_chat$Roster_Name==i,])
-    }
+    time_ordered_chat <- long_chat[order(long_chat$Time),]
     
-    ChatsFromRosterNonParticipants <- ChatsFromRosterNonParticipants[!(ChatsFromRosterNonParticipants$Chat_Content %in% possible_participation_chats),]
-    ChatsFromRosterNonParticipants <- ChatsFromRosterNonParticipants[!(grepl("\\[la\\]", ChatsFromRosterNonParticipants$Chat_Name)),]
+    name_ordered_chat <- long_chat[order(long_chat$Roster_Name),]
     
-    ParticipationResultsByChatName <- data.frame(stringsAsFactors = FALSE)
-    Individuals_missing = c()
-    for(word in possible_participation_chats){
-      participating = unique(long_chat$Chat_Name[long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)])
-      indices = c(indices, which(long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)))
-      if(grepl(" ",word)){
-        word_vect <- unlist(strsplit(word, split = " "))
-        for(w in word_vect){
-          participating = c(participating,
-                            unique(long_chat$Chat_Name[grepl(w,long_chat$Chat_Content)]))
-          indices = c(indices, which(grepl(w,long_chat$Chat_Content)))
-        }
+    
+    
+    ##### Detects whether there are "participation words" #####
+    
+    possible_participation_chats <- c()
+    for(c in unique(chat$Content)){
+      if(sum(chat$Content %in% c)>10){
+        possible_participation_chats <- c(possible_participation_chats, c)
       }
-      participating = unique(participating)
-      not_participating = setdiff(unique(long_chat$Chat_Name), participating)
-      not_participating = not_participating[!grepl("\\[la\\]", not_participating)]
-      if(length(not_participating)==0) not_participating = "none"
-      ParticipationResultsByChatName <- rbind(ParticipationResultsByChatName,
+    }
+    
+    if(length(possible_participation_chats>0)){
+      ParticipationResultsByRoster <- data.frame(stringsAsFactors = FALSE)
+      Individuals_missing = c()
+      indices = c()
+      for(word in possible_participation_chats){
+        participating = unique(long_chat$Roster_Name[long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)])
+        indices = c(indices, which(long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)))
+        if(grepl(" ",word)){
+          word_vect <- unlist(strsplit(word, split = " "))
+          for(w in word_vect){
+            participating = c(participating,
+                              unique(long_chat$Roster_Name[grepl(w,long_chat$Chat_Content)]))
+            indices = c(indices, which(grepl(w,long_chat$Chat_Content)))
+          }
+        }
+        participating = unique(participating)
+        not_participating = setdiff(unique(long_chat$Roster_Name), participating)
+        not_participating = not_participating[!grepl("\\[la\\]", not_participating)]
+        if(length(not_participating)==0) not_participating = "none"
+        ParticipationResultsByRoster <- rbind(ParticipationResultsByRoster,
                                               data.frame("Chat"=word, 
                                                          "Participants"=concatenate(participating, mysep = ", "),
                                                          "Missing_Participants"=concatenate(not_participating, mysep = ", "),
                                                          stringsAsFactors = FALSE))
-      Individuals_missing = c(Individuals_missing, not_participating)
+        Individuals_missing = c(Individuals_missing, not_participating)
+      }
+      
+      ChatsFromRosterNonParticipants <- data.frame(stringsAsFactors = FALSE)
+      for(i in Individuals_missing){
+        ChatsFromRosterNonParticipants = rbind(ChatsFromRosterNonParticipants,
+                                               long_chat[long_chat$Roster_Name==i,])
+      }
+      
+      ChatsFromRosterNonParticipants <- ChatsFromRosterNonParticipants[!(ChatsFromRosterNonParticipants$Chat_Content %in% possible_participation_chats),]
+      ChatsFromRosterNonParticipants <- ChatsFromRosterNonParticipants[!(grepl("\\[la\\]", ChatsFromRosterNonParticipants$Chat_Name)),]
+      
+      ParticipationResultsByChatName <- data.frame(stringsAsFactors = FALSE)
+      Individuals_missing = c()
+      for(word in possible_participation_chats){
+        participating = unique(long_chat$Chat_Name[long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)])
+        indices = c(indices, which(long_chat$Chat_Content==word | grepl(word,long_chat$Chat_Content)))
+        if(grepl(" ",word)){
+          word_vect <- unlist(strsplit(word, split = " "))
+          for(w in word_vect){
+            participating = c(participating,
+                              unique(long_chat$Chat_Name[grepl(w,long_chat$Chat_Content)]))
+            indices = c(indices, which(grepl(w,long_chat$Chat_Content)))
+          }
+        }
+        participating = unique(participating)
+        not_participating = setdiff(unique(long_chat$Chat_Name), participating)
+        not_participating = not_participating[!grepl("\\[la\\]", not_participating)]
+        if(length(not_participating)==0) not_participating = "none"
+        ParticipationResultsByChatName <- rbind(ParticipationResultsByChatName,
+                                                data.frame("Chat"=word, 
+                                                           "Participants"=concatenate(participating, mysep = ", "),
+                                                           "Missing_Participants"=concatenate(not_participating, mysep = ", "),
+                                                           stringsAsFactors = FALSE))
+        Individuals_missing = c(Individuals_missing, not_participating)
+      }
+      
+      ChatsFromChatNameNonParticipants <- data.frame(stringsAsFactors = FALSE)
+      for(i in Individuals_missing){
+        ChatsFromChatNameNonParticipants = rbind(ChatsFromChatNameNonParticipants,
+                                                 long_chat[long_chat$Chat_Name==i,])
+      }
+      
+      ChatsFromChatNameNonParticipants <- ChatsFromChatNameNonParticipants[!(ChatsFromChatNameNonParticipants$Chat_Content %in% possible_participation_chats),]
+      ChatsFromChatNameNonParticipants <- ChatsFromChatNameNonParticipants[!(grepl("\\[la\\]", ChatsFromChatNameNonParticipants$Chat_Name)),]
+      
+      indices = unique(indices)
+      participation_chats <- long_chat[indices,]
+      participation_chats <- participation_chats[nchar(participation_chats$Chat_Content)<30,]
+      
+      ParticipationWordResults <- data.frame("Roster_Name"=unique(long_chat$Roster_Name[long_chat$Roster_Name!="no roster match"]))
+      ParticipationWordResults$Words <- sapply(ParticipationWordResults$Roster_Name, function(x){
+        return(concatenate(participation_chats$Chat_Content[participation_chats$Roster_Name==x], mysep = ", "))
+      })
+      ParticipationWordResults$Words <- as.character(ParticipationWordResults$Words)
+      ParticipationWordResults$Words[ParticipationWordResults$Words=="character(0)"] <- "None detected"
+      ParticipationWordResults$Number <- sapply(ParticipationWordResults$Roster_Name, function(x){
+        return(length(participation_chats$Chat_Content[participation_chats$Roster_Name==x]))
+      })
+      ParticipationWordResults$Sent_all_words <- ifelse(ParticipationWordResults$Number>=length(possible_participation_chats), "Yes","No")
+      ParticipationWordResults = rbind(ParticipationWordResults, 
+                                       data.frame("Roster_Name"=missing_in_chat,
+                                                  "Words"="Did not match any chat name, possibly not attending student",
+                                                  "Number"="",
+                                                  "Sent_all_words"=""))
+      ParticipationWordResults = ParticipationWordResults[order(ParticipationWordResults$Roster_Name),]
+      cat("There were ", length(possible_participation_chats),"predicted participation words.\n")
+      print(possible_participation_chats)
+      for(wd in possible_participation_chats){
+        cat("For the ", wd, "participation check, the students on the roster who missed it were:\n")
+        students <- ParticipationResultsByRoster$Missing_Participants[ParticipationResultsByRoster$Chat==wd]
+        students <- unlist(strsplit(students, split = ", "))
+        students <- students[!grepl("no roster match", students)]
+        print(students)
+      }
+      cat("These students may have misspelled the participation word. Check the 'Chats NonParticipat Roster' result. Missing students are not included here.\n\n")
     }
     
-    ChatsFromChatNameNonParticipants <- data.frame(stringsAsFactors = FALSE)
-    for(i in Individuals_missing){
-      ChatsFromChatNameNonParticipants = rbind(ChatsFromChatNameNonParticipants,
-                                               long_chat[long_chat$Chat_Name==i,])
-    }
-    
-    ChatsFromChatNameNonParticipants <- ChatsFromChatNameNonParticipants[!(ChatsFromChatNameNonParticipants$Chat_Content %in% possible_participation_chats),]
-    ChatsFromChatNameNonParticipants <- ChatsFromChatNameNonParticipants[!(grepl("\\[la\\]", ChatsFromChatNameNonParticipants$Chat_Name)),]
-    
-    indices = unique(indices)
-    participation_chats <- long_chat[indices,]
-    participation_chats <- participation_chats[nchar(participation_chats$Chat_Content)<30,]
-    
-    ParticipationWordResults <- data.frame("Roster_Name"=unique(long_chat$Roster_Name[long_chat$Roster_Name!="no roster match"]))
-    ParticipationWordResults$Words <- sapply(ParticipationWordResults$Roster_Name, function(x){
-      return(concatenate(participation_chats$Chat_Content[participation_chats$Roster_Name==x], mysep = ", "))
+    wide_chat <- data.frame("Chat_Name"=unique(long_chat$Chat_Name))
+    wide_chat$Roster_Name <- sapply(wide_chat$Chat_Name, function(x){
+      return(concatenate(unique(long_chat$Roster_Name[long_chat$Chat_Name==x]), mysep = " OR "))
     })
-    ParticipationWordResults$Words <- as.character(ParticipationWordResults$Words)
-    ParticipationWordResults$Words[ParticipationWordResults$Words=="character(0)"] <- "None detected"
-    ParticipationWordResults$Number <- sapply(ParticipationWordResults$Roster_Name, function(x){
-      return(length(participation_chats$Chat_Content[participation_chats$Roster_Name==x]))
+    wide_chat$Time <- sapply(wide_chat$Chat_Name, function(x){
+      return(concatenate(long_chat$Time[long_chat$Chat_Name==x], mysep = ", "))
     })
-    ParticipationWordResults$Sent_all_words <- ifelse(ParticipationWordResults$Number>=length(possible_participation_chats), "Yes","No")
-    ParticipationWordResults = rbind(ParticipationWordResults, 
-                                     data.frame("Roster_Name"=missing_in_chat,
-                                                "Words"="Did not match any chat name, possibly not attending student",
-                                                "Number"="",
-                                                "Sent_all_words"=""))
-    ParticipationWordResults = ParticipationWordResults[order(ParticipationWordResults$Roster_Name),]
-    cat("There were ", length(possible_participation_chats),"predicted participation words.\n")
-    print(possible_participation_chats)
-    for(wd in possible_participation_chats){
-      cat("For the ", wd, "participation check, the students on the roster who missed it were:\n")
-      students <- ParticipationResultsByRoster$Missing_Participants[ParticipationResultsByRoster$Chat==wd]
-      students <- unlist(strsplit(students, split = ", "))
-      students <- students[!grepl("no roster match", students)]
-      print(students)
+    wide_chat$Chat_Content <- sapply(wide_chat$Chat_Name, function(x){
+      return(concatenate(long_chat$Chat_Content[long_chat$Chat_Name==x], mysep = ", "))
+    })
+    
+    result <- list()
+    
+    if(length(missing_in_chat)>0){
+      result[["Missing Students"]] <- rbind(data.frame("Missing_Students"=missing_in_chat),
+                                            data.frame("Missing_Students"="Reminder: some student names from the roster may not have matched to a chat name. Please check the chat names for a possible match. In addition, please review the matched roster and chat names because a chat name may have mistakenly been matched to someone on the roster."))
+    } else {result[["Missing Students"]] <- data.frame("Missing_Students"="None! Remember some chat names may be inappropriately matched with a roster name")}
+    
+    
+    if(length(setdiff(unique(chat$Individual), unique(all_matched$Chat_Name)))>0){ 
+      result[["ChatNames No Match to Roster"]] <- data.frame("Chat_Name"=c(setdiff(unique(chat$Individual), 
+                                                                                   unique(all_matched$Chat_Name)),
+                                                                           "Reminder: Check if these chat names may be one of your missing roster students"))
     }
-    cat("These students may have misspelled the participation word. Check the 'Chats NonParticipat Roster' result. Missing students are not included here.\n\n")
+    
+    if(length(possible_participation_chats)>0){
+      result[["Participation Results"]] <- ParticipationWordResults
+      ChatsFromRosterNonParticipants <- rbind(ChatsFromRosterNonParticipants,
+                                              data.frame("Time"="This file exists to see if the student did put the participation word but misspelled it, for example.",
+                                                         "Chat_Name"="",
+                                                         "Roster_Name"="",
+                                                         "Type"="",
+                                                         "Chat_Content"="", stringsAsFactors = FALSE))
+      result[["Chats NonParticipat Roster"]] <- ChatsFromRosterNonParticipants
+    }
+    result[["RosterName ChatName Matching"]] <- all_matched
+    result[["All Chat Long"]] <- time_ordered_chat
+    result[["All Chat Long Roster Order"]] <- name_ordered_chat
+    result[["All Chat Wide"]] <- wide_chat
+    
+    if(length(possible_participation_chats)>0){
+      result[["Participation Chat"]] <- participation_chats
+      result[["Partic Result By Word Roster"]] <- ParticipationResultsByRoster
+      result[["Partic Result By Word ChatName"]] <- ParticipationResultsByChatName
+      result[["Chats NonParticipat ChatNames"]] <- ChatsFromChatNameNonParticipants
+    } else cat("There were no predicted participation checks in which the same word was prompted.\n")
+    
+    if(length(zoom_particip)!=0){
+      #zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
+      cat("Zoom participants file present. Now matching roster with Zoom participant names...\n")
+      cat("There may be many duplicate matchings because students will have slightly different name across zoom sessions...\n")
+      chat_people = tolower(unique(zoom_particip$Name..Original.Name.))
+      chat_people = chat_people[!grepl("\\[la\\]", chat_people)]
+      matching_result <- matchRosterChatName(roster_people = roster_people, chat_people = chat_people)
+      cat("The following students were not detected in the Zoom participants file.\n")
+      print(matching_result[["Missing"]])
+      matchings <- matching_result[["MatchingResult"]]
+      matchings <- matchings[order(matchings$Roster_Name),]
+      colnames(matchings) <- c("Roster_Name","Zoom_Participant_Name","Confidence")
+      result[["Roster_Match_Zoom_Particip"]] <- matchings
+      result[["Roster_Missing_Zoom_Particip"]] <- data.frame("Missing_Students"=matching_result[["Missing"]])
+    }
+    
+    
+    WriteXLS(result, "Participation_Results.xls", SheetNames = names(result))
+    cat("\nReport done. Saved n 'Participation_Results.xls'.\n\n")
+  } else{
+    cat("Roster not detected. Assuming that user just wants a chat report. Outputting chat report in long and wide format.\n")
+    cat("...\n")
+    chat$All <- NULL
+    write.table(chat,"Chat_Report_Long.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+    wide_chat <- data.frame("Chat_Name"=unique(chat$Chat_Name))
+    wide_chat$Time <- sapply(wide_chat$Chat_Name, function(x){
+      return(concatenate(chat$Time[chat$Chat_Name==x], mysep = ", "))
+    })
+    wide_chat$Chat_Content <- sapply(wide_chat$Chat_Name, function(x){
+      return(concatenate(chat$Chat_Content[chat$Chat_Name==x], mysep = ", "))
+    })
+    write.table(chat,"Chat_Report_Wide.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+    cat("Done. Saved in current working directory.\n")
   }
   
-  wide_chat <- data.frame("Chat_Name"=unique(long_chat$Chat_Name))
-  wide_chat$Roster_Name <- sapply(wide_chat$Chat_Name, function(x){
-    return(concatenate(unique(long_chat$Roster_Name[long_chat$Chat_Name==x]), mysep = " OR "))
-  })
-  wide_chat$Time <- sapply(wide_chat$Chat_Name, function(x){
-    return(concatenate(long_chat$Time[long_chat$Chat_Name==x], mysep = ", "))
-  })
-  wide_chat$Chat_Content <- sapply(wide_chat$Chat_Name, function(x){
-    return(concatenate(long_chat$Chat_Content[long_chat$Chat_Name==x], mysep = ", "))
-  })
+  rm(list=ls())
   
-  result <- list()
-  
-  if(length(missing_in_chat)>0){
-    result[["Missing Students"]] <- rbind(data.frame("Missing_Students"=missing_in_chat),
-                                          data.frame("Missing_Students"="Reminder: some student names from the roster may not have matched to a chat name. Please check the chat names for a possible match. In addition, please review the matched roster and chat names because a chat name may have mistakenly been matched to someone on the roster."))
-  } else {result[["Missing Students"]] <- data.frame("Missing_Students"="None! Remember some chat names may be inappropriately matched with a roster name")}
-  
-  
-  if(length(setdiff(unique(chat$Individual), unique(all_matched$Chat_Name)))>0){ 
-    result[["ChatNames No Match to Roster"]] <- data.frame("Chat_Name"=c(setdiff(unique(chat$Individual), 
-                                                                                 unique(all_matched$Chat_Name)),
-                                                                         "Reminder: Check if these chat names may be one of your missing roster students"))
-  }
-  
-  if(length(possible_participation_chats)>0){
-    result[["Participation Results"]] <- ParticipationWordResults
-    ChatsFromRosterNonParticipants <- rbind(ChatsFromRosterNonParticipants,
-                                            data.frame("Time"="This file exists to see if the student did put the participation word but misspelled it, for example.",
-                                                       "Chat_Name"="",
-                                                       "Roster_Name"="",
-                                                       "Type"="",
-                                                       "Chat_Content"="", stringsAsFactors = FALSE))
-    result[["Chats NonParticipat Roster"]] <- ChatsFromRosterNonParticipants
-  }
-  result[["RosterName ChatName Matching"]] <- all_matched
-  result[["All Chat Long"]] <- time_ordered_chat
-  result[["All Chat Long Roster Order"]] <- name_ordered_chat
-  result[["All Chat Wide"]] <- wide_chat
-  
-  if(length(possible_participation_chats)>0){
-    result[["Participation Chat"]] <- participation_chats
-    result[["Partic Result By Word Roster"]] <- ParticipationResultsByRoster
-    result[["Partic Result By Word ChatName"]] <- ParticipationResultsByChatName
-    result[["Chats NonParticipat ChatNames"]] <- ChatsFromChatNameNonParticipants
-  } else cat("There were no predicted participation checks in which the same word was prompted.\n")
-  
-  if(length(zoom_particip)==1){
-    zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
-    cat("Zoom participants file present. Now matching roster with Zoom participant names...\n")
-    cat("There may be many duplicate matchings because students will have slightly different name across zoom sessions...\n")
-    chat_people = tolower(unique(zoom_particip$Name..Original.Name.))
-    chat_people = chat_people[!grepl("\\[la\\]", chat_people)]
-    matching_result <- matchRosterChatName(roster_people = roster_people, chat_people = chat_people)
-    cat("The following students were not detected in the Zoom participants file.\n")
-    print(matching_result[["Missing"]])
-    matchings <- matching_result[["MatchingResult"]]
-    matchings <- matchings[order(matchings$Roster_Name),]
-    colnames(matchings) <- c("Roster_Name","Zoom_Participant_Name","Confidence")
-    result[["Roster_Match_Zoom_Particip"]] <- matchings
-    result[["Roster_Missing_Zoom_Particip"]] <- data.frame("Missing_Students"=matching_result[["Missing"]])
-  }
-  
-  
-  WriteXLS(result, "Participation_Results.xls", SheetNames = names(result))
-  cat("\nReport done. Saved in 'Participation_Results.xls' in current working directory.\n\n")
-} else{
-  cat("Roster not detected. Assuming that user just wants a chat report. Outputting chat report in long and wide format.\n")
-  cat("...\n")
-  chat$All <- NULL
-  write.table(chat,"Chat_Report_Long.txt", row.names = FALSE, quote = FALSE, sep = "\t")
-  wide_chat <- data.frame("Chat_Name"=unique(chat$Chat_Name))
-  wide_chat$Time <- sapply(wide_chat$Chat_Name, function(x){
-    return(concatenate(chat$Time[chat$Chat_Name==x], mysep = ", "))
-  })
-  wide_chat$Chat_Content <- sapply(wide_chat$Chat_Name, function(x){
-    return(concatenate(chat$Chat_Content[chat$Chat_Name==x], mysep = ", "))
-  })
-  write.table(chat,"Chat_Report_Wide.txt", row.names = FALSE, quote = FALSE, sep = "\t")
-  cat("Done. Saved in current working directory.\n")
 }
 
-rm(list=ls())
-
-}
