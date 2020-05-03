@@ -555,7 +555,7 @@ if(length(roster)!=0 & length(chat)==0 & length(zoom_particip)!=0){
     
     
     WriteXLS(result, "Participation_Results.xls", SheetNames = names(result))
-    cat("\nReport done. Saved n 'Participation_Results.xls'.\n\n")
+    cat("\nReport done. Saved in 'Participation_Results.xls'.\n\n")
   } else{
     cat("Roster not detected. Assuming that user just wants a chat report. Outputting chat report in long and wide format.\n")
     cat("...\n")
