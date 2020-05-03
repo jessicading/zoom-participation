@@ -32,8 +32,6 @@
 
 #library(WriteXLS)
 
-dir.create(path = "./Participation_Results")
-
 concatenate=function(myvect, mysep="")
 {
   if(length(myvect)==0) return(myvect)
@@ -54,22 +52,82 @@ if(length(files)==0){
   cat("(3) Roster file and Zoom Participants file\n")
   cat("(4) Chat file, Roster file, and Zoom Participants file\n\n")
 }
+
 roster <- files[grep("tsv", files)]
-if(length(roster)>1) cat("Error: There should only be 1 roster file which is a .tsv file")
+if(length(roster)>1){
+  ifelse(!dir.exists("./Appended_Files"), dir.create("./Appended_Files"), FALSE)
+  cat("Multiple roster files (.tsv) detected.\n")
+  cat("Appending these roster files all together...\n")
+  print(roster)
+  df <- data.frame()
+  for(file in roster){
+    df <- rbind(df, read.delim(file, stringsAsFactors = FALSE,colClasses = rep("character",8),skip = 8))
+  }
+  roster <- df
+  cat("Writing appended roster file...\n")
+  cat("Warning: if you use this appended file for future runs, manually add 8 new lines to the beginning and save as a .tsv file.\n\n")
+  write.table(roster, "./Appended_Files/Appended_roster.tsv", row.names = FALSE, sep = "\t", quote = FALSE)
+}
+if(length(roster)==1){ 
+  cat("The roster file (.tsv) is ", roster, ".\n")
+  roster <- read.delim(roster, stringsAsFactors = FALSE,colClasses = rep("character",8), skip = 8)
+}
+
 chat <- files[grep("chat", files)]
 if(length(chat)==0 & sum(grepl(".txt", files))>0){
   cat("Chat file not found by the identifier 'chat'. Finding based on '.txt'\n")
   chat <- files[grep(".txt", files)]
-  cat("The choosen chat file is ", chat, ". Please rerun if this is not the desired chat file.\n")
+  cat("The choosen chat file(s) is ", chat, ". Please rerun if this is not the desired chat file(s).\n\n")
 }
-if(length(chat)>1) cat("Error: There should only be 1 meeting saved chat file")
+if(length(chat)>1){
+  ifelse(!dir.exists("./Appended_Files/"), dir.create("./Appended_Files/"), FALSE)
+  cat("Multiple chat files ('chat' or .txt) detected.\n")
+  cat("Appending these chat files all together...\n")
+  print(chat)
+  df <- data.frame(stringsAsFactors = FALSE)
+  for(file in chat){
+    df <- rbind(df, read.delim(file,header = FALSE, quote = "",
+                               stringsAsFactors = FALSE,
+                               colClasses = rep("character",2)))
+  }
+  chat <- df
+  cat("Writing appended chat file...\n\n")
+  write.table(chat, "./Appended_Files/Appended_chat.txt", row.names = FALSE, sep = "\t", quote = FALSE)
+}
+if(length(chat)==1){ 
+  cat("The chat file is ", chat, ".\n\n")
+  chat <- read.delim(chat, header = FALSE,quote = "",
+                     stringsAsFactors = FALSE,
+                     colClasses = rep("character",2))
+}
+
 zoom_particip <- files[grep("participants_", files)]
 if(length(zoom_particip)==0 & sum(grepl(".csv", files))>0){
   cat("Zoom Participants file not found by the identifier 'participants_'. Finding based on '.csv'\n")
   zoom_particip <- files[grep(".csv", files)]
   cat("The choosen Zoom Participants file is ", zoom_particip, ". Please rerun if this is not the Zoom Participants chat file.\n")
 }
-if(length(zoom_particip)>1) cat("Error: There should only be 1 Zoom participants file")
+if(length(zoom_particip)>1){
+  ifelse(!dir.exists("./Appended_Files/"), dir.create("./Appended_Files/"), FALSE)
+  cat("Multiple Zoom participants files ('participants_' or .csv) detected.\n")
+  cat("Appending these Zoom participants files all together...\n")
+  print(zoom_particip)
+  df <- data.frame(stringsAsFactors = FALSE)
+  for(file in zoom_particip){
+    df <- rbind(df, read.delim(file,
+                               stringsAsFactors = FALSE,sep = ",",
+                               colClasses = c(rep("character",4), "numeric")))
+  }
+  zoom_particip <- df
+  cat("Writing appended Zoom participants file...\n\n")
+  write.table(zoom_particip, "./Appended_Files/Appended_Zoom_Participants.csv", row.names = FALSE, sep = ",", quote = FALSE)
+}
+if(length(zoom_particip)==1){ 
+  cat("The Zoom participation file is ", chat, ".\n\n")
+  zoom_particip <- read.delim(zoom_particip, sep = ",",
+                     stringsAsFactors = FALSE,
+                     colClasses = c(rep("character",4), "numeric"))
+}
 
 reportDuplicateMatching <- function(df, confidence_level){
   if(sum(duplicated(df$Roster_Name))>0){
@@ -215,11 +273,12 @@ matchRosterChatName <- function(roster_people = roster_people, chat_people = cha
   return(list("MatchingResult"=all_matched, "Missing"=missing_in_chat))
 }
 
-if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
+if(length(roster)!=0 & length(chat)==0 & length(zoom_particip)!=0){
+  dir.create(path = "./Results")
   cat("\nRoster file and Zoom participants file provided. Now running name matching...\n")
   cat("There may be many duplicate matchings because students will have slightly different name across zoom sessions.\n")
-  zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
-  roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
+  #zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
+  #roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
   roster$Name <- tolower(roster$Name)
   roster$Name <- gsub(",","", roster$Name)
   
@@ -238,9 +297,9 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   matchings <- matching_result[["MatchingResult"]]
   matchings <- matchings[order(matchings$Roster_Name),]
   colnames(matchings) <- c("Roster_Name","Zoom_Participant_Name","Confidence")
-  write.table(matchings, "Roster_Match_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+  write.table(matchings, "./Results/Roster_Match_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
   write.table(data.frame("Missing_Students"=matching_result[["Missing"]]), 
-              "Missing_Roster_In_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
+              "./Results/Missing_Roster_In_Zoom_Participants.txt", row.names = FALSE, quote = FALSE, sep = "\t")
   
   cat("\nReport done. Possible LAs are taken out.\n")
   
@@ -248,7 +307,7 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   
 } else{
   
-  chat <- read.delim(chat, quote = "", stringsAsFactors = FALSE, header = FALSE)
+  #chat <- read.delim(chat, quote = "", stringsAsFactors = FALSE, header = FALSE)
   
   colnames(chat) <- c("Time","All")
   
@@ -269,12 +328,13 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   chat = chat[order(chat$Time),]
   chat <- chat[,c("Time","Individual","Type","Content","All")]
   
-  if(length(roster)==1){
+  if(length(roster)!=0){
     #lowercase all content and names
+    dir.create(path = "./Participation_Results")
     chat$Content <- tolower(chat$Content)
     chat$Individual <- tolower(chat$Individual)
     
-    roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
+    #roster <- read.delim(roster, skip=8, stringsAsFactors = FALSE)
     roster$Name <- tolower(roster$Name)
     roster$Name <- gsub(",","", roster$Name)
     
@@ -482,8 +542,8 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
       result[["Chats NonParticipat ChatNames"]] <- ChatsFromChatNameNonParticipants
     } else cat("There were no predicted participation checks in which the same word was prompted.\n")
     
-    if(length(zoom_particip)==1){
-      zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
+    if(length(zoom_particip)!=0){
+      #zoom_particip <- read.delim(zoom_particip, header = TRUE, stringsAsFactors = FALSE, sep = ",")
       cat("Zoom participants file present. Now matching roster with Zoom participant names...\n")
       cat("There may be many duplicate matchings because students will have slightly different name across zoom sessions...\n")
       chat_people = tolower(unique(zoom_particip$Name..Original.Name.))
@@ -505,7 +565,7 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
       write.table(result[[iter]], file = paste0("./Participation_Results/",names(result)[iter],".txt"), 
                   row.names = FALSE, quote = FALSE, sep = "\t")
     }
-    cat("\nReport done. Saved in '.txt' result files saved in current working directory.\n\n")
+    cat("\nReport done. Saved as .txt files in 'Participation_Results' folder.\n\n")
   } else{
     cat("Roster not detected. Assuming that user just wants a chat report. Outputting chat report in long and wide format.\n")
     cat("...\n")
@@ -525,3 +585,4 @@ if(length(roster)==1 & length(chat)==0 & length(zoom_particip)==1){
   rm(list=ls())
   
 }
+
