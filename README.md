@@ -69,7 +69,3 @@ The easiest way to match Zoom participants with roster names is to have Zoom par
 
 This script was made specifically for LS 7C where participation checks are made sometimes more than once during the discussion.
 
-If you'd like to sponsor me to build and host a webserver, let me know. :)
-
-
-
