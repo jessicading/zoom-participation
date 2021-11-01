@@ -1,5 +1,5 @@
 # Zoom Participation Report
-<em>Currently in beta phase. Need more independent testing to assess robustness. Please let me know if it worked for you or whether you'd like any changes :) </em>
+Note: This program was made for Zoom chat output of Spring 2020. There may have been changes since then which may introduce incompatibilities.  
 
 This R script is designed to "take attendance" from the Zoom chat or Zoom participants file by referencing the roster downloaded from myUCLA.
 
